@@ -156,7 +156,9 @@ for (range in ranges.to.do) {
 cdl.raster.path <- ("../raw_data_files/cdl/cdl_2016_30m.img")
 
 # vectorize county level rasters for select crops from CDL layer
-ClipVectorizeCDL(counties, cdl.raster.path, fips = fips.to.do)
+foreach (fips = fips.to.do) %do% {
+  ClipVectorizeCDL(counties, cdl.raster.path, fips)
+}
 
 for (crop in crops.to.do) {
   
@@ -168,15 +170,20 @@ for (crop in crops.to.do) {
 
 }
 
-# calculate residue feedstock biosheds
-for (range in ranges.to.do) {
+### calculate residue feedstock biosheds
+# iterate over crops
+for (crop in crops.to.do) {
   
-  CalcBiosheds(biorefs, crop, edges.data = roads, max.dist = range)
-  
-  # collate biosheds into single file
-  CollateBiosheds(biorefs, crop, range)
+  # iterate over drive distance ranges
+  for (range in ranges.to.do) {
+    
+    # calculate biosheds
+    CalcBiosheds(biorefs, crop, edges.data = roads, max.dist = range)
+    
+    # collate biosheds into single file
+    CollateBiosheds(biorefs, crop, range)
+  }
 }
-
 
 #-----------------------------------------------------------------------------#
 ### Generate final results dataframe
