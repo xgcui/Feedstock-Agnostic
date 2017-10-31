@@ -96,7 +96,7 @@ This subdirectory contains all the R source code and scripts for the project. A 
 
 **`install_required_packages.R`** - An R script that installs all libraries required by other scripts in this project directory. Running this script before any others would be advisabel to ensure that all required packages are up to date on your local machine.  
 
-**`main_analysis.R`** - The full-pipeline analysis script for calculating biosheds of biorefinery locations via a road network analysis using estimates of feedstock production distributions at the sub-county level. Outputs a `.csv` file with the feedstock supply data for the parameters specified. The control flow of this script should serve as a guide to understanding the workflow of the entire analysis. All other functions in the `~/R_code/` directory are sourced and called directly by `main_analysis.R`, or by a function within `main_analysis.R`. 
+**`main_analysis.R`** - The full-pipeline analysis script for calculating biosheds of biorefinery locations via a road network analysis using estimates of feedstock production distributions at the sub-county level. Outputs a `.csv` file with the feedstock supply data for the parameters specified. The control flow of this script should serve as a guide to understanding the workflow of the entire analysis. All other functions in the `~/R_code/` directory are sourced and called directly by `main_analysis.R`, or by a function within `main_analysis.R`. This file has been run through by CUI on October, 2017 after debugging. This can be seen as a template file on how to compute how to compute cluster, bioshed and mass in eachbioshed.
 
 **`load.R`** - An R script that takes the raw data files required for the project as input and outputs a binary workspace image (`.RData`) to the`root/raw_binary_data` directory. This workspace image is loaded into the `clean.R` script for data cleaning and organization.
 
@@ -112,6 +112,8 @@ designed for the particular analysis being performed. The file name generally re
 that they once visualized upon may have changed. However, they may still provide useful templates for generating graphics of a similar style to ones created previously. 
 
 In addition to the scripts described above, there is also a subdirectory within `root/R_code` named `R_code_arhives`. This a repository of R source files that were generated in the process of developing the current iteration of the modeling framework. Many of these scripts are out-of-date and may not be functional, however, I have archived them in this repository in case there are any useful code snippets that might be salvagable. While there are no gurantees about functionality, all the code is thoroughly commented so it should be fairly obvious what a particular construct was designed to accomplish.  
+
+**`required.packages.R`** - In this R script, it lists all of the pacakges which are required to run these scripts. By run it, it can know which package needs to install
 
 <br>
 

@@ -6,6 +6,7 @@
 
 # AUTHOR:
 # Tyler Huntington, 2017
+# XG CUI, 2017 October, debug
 # JBEI Sustainability Research Group
 # Project: Feedstock Agnostic Biorefinery Study
 
@@ -84,8 +85,9 @@ CalcBiosheds <- function(hubs.data, crop, edges.data, constraint = "distance",
   output.cids.ls <- vector("list", length = nrow(hubs.data))
   
   # initiate parallel cluster
-  no_cores <- detectCores()
-  cl <- makeCluster(no_cores, outfile = "")
+  no_cores <- detectCores()-1
+#  no_cores = 30
+  cl <- makeCluster(no_cores, outfile = "log.calbioshed.txt")
   registerDoSNOW(cl)
   
   # set RID sequence

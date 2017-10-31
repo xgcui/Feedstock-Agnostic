@@ -32,7 +32,7 @@
 
 #-----------------------------------------------------------------------------#
 
-ClipVectorizeCDL <- function(counties.data, raster.path, fips) {
+ClipVectorizeCDL <- function(counties.data, raster.path, fips,all.targeted.crops) {
   
   ###### LOAD LIBRARIES ######
   require(raster)
@@ -63,7 +63,16 @@ ClipVectorizeCDL <- function(counties.data, raster.path, fips) {
   
   # get df of cell value codes
   ras.vals.df <- raster.data@data@attributes[[1]]
-  
+
+  ####################################################################################################
+  ## it get all crop names in CDL and then cut the ras.pts in end
+
+  crops.cld.names=grep(paste(all.targeted.crops, collapse="|"), ras.vals.df$Class_Names,value=T)
+  crops.cld.names <- c(crops.cld.names, grep("Wht", ras.vals.df$Class_Names, value = T))
+  crops.cld.vals <- ras.vals.df[ras.vals.df$Class_Names %in%crops.cld.names, "ID"]
+  ## it get all crop names in CDL and then cut the ras.pts in end
+  ####################################################################################################
+ 
   ###### PREP DATA #######
   
   print("cropping extent of NLCD layer to county...")
@@ -101,6 +110,11 @@ ClipVectorizeCDL <- function(counties.data, raster.path, fips) {
   ras.pts <- ras.pts[county,]
 
   ras.pts <- cbind(ras.pts@coords, as.matrix(ras.pts@data))
+  
+  #############before save, do another crop with crops.cld.names, which will decrease the file size 
+  ############# and will be much faster#############
+  crops.cld.names.cut.id=which(ras.pts[,3]%in%crops.cld.vals)
+  ras.pts=ras.pts[crops.cld.names.cut.id,]
 
   # export point representation of raster layer
   saveRDS(ras.pts, paste0("../output/bin/FIPS_", 

@@ -93,7 +93,7 @@ feedstocks <- c("Corn stover", "Wheat straw", "Sorghum",
 feedstocks <- c("Corn stover", "Switchgrass")
 
 # set max drive distance constraints (in miles) for calculating biosheds
-ranges.to.do <- c(40, 50, 60)[3]
+ranges.to.do <- c(40, 50, 60)
 
 # define years to run analysis for
 # note: these must correspond to years in Year column of
@@ -122,89 +122,28 @@ crops.to.do <- GetCropList(feedstocks)
 # generate list of all US county FIPs (or replace with list of FIPs to analyze)
 fips.to.do <- unique(counties$FIPS)
 
-### Initialize parallel backend
-no.cores <- (detectCores() - 1)
-no.cores = 20
-cl <- makeCluster(no.cores, type = "SOCK", outfile="log.clip.nlcd.txt")
-registerDoSNOW(cl)
 
-## Dedicated energy crop feedstocks:
-# set filepath to NLCD raster data
-nlcd.raster.path <- ("../raw_data_files/nlcd/nlcd_2011_30m.img")
+crops.to.do=c('Wheat','Corn', 'Sorghum', "Oats","Barley",'Surgarcane','Rice')
 
-# vectorize county level rasters of crop/pasture land from NLCD layer
-foreach (fips = fips.to.do) %dopar% {
-  ClipMaskVectorizeNLCD(counties, nlcd.raster.path, fips)
-}
-
-stopCluster(cl)
-# find k-means clusters of crop/pasture land (potential energy crop land)
- CalcClusterCentsNLCD(counties, fips.to.do)
-
-# aggregate all US county cluster cents into single file
-CollateCountyClusterCents(crop = "EnergyCrops", fips.to.do)
-
-
-for (range in ranges.to.do) {
-  # calculate dedicated energy crop biosheds based on crop/pasture kmeans cents
-  CalcBiosheds(biorefs, crop = "EnergyCrops", 
-                     edges.data = roads, max.dist = range)
-  
-  # collate biosheds into single file
-  CollateBiosheds(biorefs, crop = "EnergyCrops", range)
-}
-
-
-no.cores <- (detectCores() - 1)
-no.cores = 20
-cl <- makeCluster(no.cores, type = "SOCK", outfile="log.clip.cdl.txt")
-registerDoSNOW(cl)
-
-## Crop residue feedstocks:
-# set filepath to CDL raster data
-cdl.raster.path <- ("../raw_data_files/cdl/cdl_2016_30m.img")
-
-all.targeted.crops=c('Wheat','Corn', 'Sorghum', "Oats","Barley",'Surgarcane','Rice')
-# vectorize county level rasters for select crops from CDL layer
-foreach (fips = fips.to.do) %dopar% {
-  ClipVectorizeCDL(counties, cdl.raster.path, fips,all.targeted.crops)
-}
-stopCluster(cl)
-
-for (crop in crops.to.do[2]) {
-  
-  # calculate cluster centroids
-   CalcClusterCentsCDL(counties, cdl.raster.path, crop, fips.to.do)
-  
-  # collate clusters
-   CollateCountyClusterCents(crop, fips.to.do)
-
-}
-
-### calculate residue feedstock biosheds
-# iterate over crops
-for (crop in crops.to.do[2]) {
-  
+print('calbioshed: ')
+for (crop in crops.to.do[1:4]) {
+  cat('processing: ',crop,'\n')
   # iterate over drive distance ranges
   for (range in ranges.to.do) {
-    
+    cat('processing: ',range,'\n')
     # calculate biosheds
     CalcBiosheds(biorefs, crop, edges.data = roads, max.dist = range)
     
     # collate biosheds into single file
     CollateBiosheds(biorefs, crop, range)
+    system("rm ../output/bin/*")
   }
 }
 
 #-----------------------------------------------------------------------------#
 ### Generate final results dataframe
 
-results.df <- MakeBioshedsDataFrame(biomass.data, biorefs, counties, 
-                                    feedstocks, years, scenarios, 
-                                    prices, ranges.to.do)
-
-# empty the intermediate files bin
-system("rm ../output/bin/*")
+#system("rm ../output/bin/*")
 
 
 

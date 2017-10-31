@@ -3,7 +3,7 @@
 
 # AUTHOR:
 # Tyler Huntington, 2017
-
+# XG CUI, 2017 October debug
 # JBEI Sustainability Team
 # Feedstock Agnostic Study
 # PI: Corinne Scown PhD
@@ -96,8 +96,9 @@ CalcClusterCentsCDL <- function(counties.data, raster.path, crop, fips.codes) {
   
   # parallel comp
   # init cluster
-  no.cores <- detectCores()
-  cl <- makeCluster(no.cores, type = "SOCK", outfile="log.txt")
+  no.cores <- detectCores()-1
+  no.cores = 30
+  cl <- makeCluster(no.cores, type = "SOCK", outfile="log.cal.cdl.txt")
   registerDoSNOW(cl)
   
   US.cluster.cents <-
@@ -105,7 +106,7 @@ CalcClusterCentsCDL <- function(counties.data, raster.path, crop, fips.codes) {
             .combine = "rbind",
             .packages = c("broom", "dplyr", "sp",
                           "raster", "maptools", 
-                          "rgeos")) %do% {
+                          "rgeos")) %dopar% {
                             
     cat(sprintf("Working on FIPS: %s", fips))       
     
@@ -128,6 +129,7 @@ CalcClusterCentsCDL <- function(counties.data, raster.path, crop, fips.codes) {
     }
     
     RecodeVals <- Vectorize(RecodeVals, vectorize.args = c("val"))
+    county.pts <- matrix(county.pts, ncol = 3)
     county.pts[,3] <- RecodeVals(county.pts[,3], ded.vals, dbl.vals)
     
     # drop points with val of zero
@@ -146,7 +148,7 @@ CalcClusterCentsCDL <- function(counties.data, raster.path, crop, fips.codes) {
     
     if (nrow(unique(county.pts)) <= 20) {
       if (nrow(county.pts) == 0) {
-        county.poly <- counties[counties$FIPS == fips, ]
+        county.poly <- counties.data[counties.data$FIPS == fips, ]
         cent <- gCentroid(county.poly)
         x1 <- cent@coords[1]
         x2 <- cent@coords[2]
@@ -158,7 +160,7 @@ CalcClusterCentsCDL <- function(counties.data, raster.path, crop, fips.codes) {
       size <- nrow(county.pts)
       withinss <- 0
       cluster <- 1
-      cid <- paste0(fips, ".1")
+      cid <-as.character(paste0(fips, ".1"))
       
       clusters <- data.frame(x1, x2, size, withinss, cluster, fips, cid)
       
@@ -189,8 +191,8 @@ CalcClusterCentsCDL <- function(counties.data, raster.path, crop, fips.codes) {
       # cbind fips and cid (unqique cluster id) columns
       clusters$fips <- fips
       clusters$cluster <- as.character(clusters$cluster)
-      clusters$cid <- lapply(clusters$cluster, 
-                             function(x) {paste0(fips, ".", x)})
+      clusters$cid <- as.character(lapply(clusters$cluster, 
+                             function(x) {paste0(fips, ".", x)}))
       
     }
     

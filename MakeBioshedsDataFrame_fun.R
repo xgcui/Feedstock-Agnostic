@@ -64,7 +64,8 @@ MakeBioshedsDataFrame <- function(biomass.data, biorefs.data, counties.data,
   source("SumBioshedFeeds_fun.R")
   
   no.cores <- (detectCores() - 1)
-  cl <- makeCluster(no.cores, type = "SOCK", outfile="")
+  no.cores = 30
+  cl <- makeCluster(no.cores, type = "SOCK", outfile="log.bioshed.biomass")
   registerDoSNOW(cl)
   
   res <- foreach (feed = feeds, .combine = "rbind", 
@@ -103,7 +104,7 @@ MakeBioshedsDataFrame <- function(biomass.data, biorefs.data, counties.data,
                                        scenario, feed, price)
             
             if (nrow(biomass.df) == 0) {
-              res <- biorefs.sptdf
+              res <- biorefs.data
               res$Feedstock <- gsub(" ", "_", feed)
               res$Year <- year
               res$Drive.range <- range
@@ -161,10 +162,8 @@ MakeBioshedsDataFrame <- function(biomass.data, biorefs.data, counties.data,
   write.csv(res@data, csv.filepath, fileEncoding = "UTF-16LE", row.names = F)
 
   # cancel parallel backend
+  return(res)
   stopCluster(cl)
-  
-  return(result.df)
-
 }
 
 

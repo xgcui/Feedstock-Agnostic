@@ -5,6 +5,7 @@
 
 # AUTHOR:
 # Tyler Huntington, 2017
+# XG CUI, 2017 October, debug
 # JBEI Sustainability Research Group
 # Project: Feedstock Agnostic Biorefinery Study
 
@@ -58,6 +59,7 @@ CalcDriveRoute <- function(basemap, start.coords, end.coords) {
   require(igraph)
   require(shp2graph)
   require(rgdal)
+  require(maptools)
   
   ###### LOAD COORD REF SYSTEMS ######
   aea.crs <- CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23.0
@@ -148,7 +150,8 @@ CalcDriveRoute <- function(basemap, start.coords, end.coords) {
     # integrate bioref node into net
     # creates new node on net for bioref at closest point on nearest edge
     # appends node to end of nodelist 
-    net <- points2network(basemap, start.end.nodes, mapping.method = 2, 
+    	net=points2network(basemap, start.end.nodes, approach = 2,
+     #net <- points2network(basemap, start.end.nodes, mapping.method = 2, 
                           ELComputed=T, longlat=T, Detailed=F, ea.prop = cols)
     
     # get nodes of road network

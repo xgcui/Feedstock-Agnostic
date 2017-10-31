@@ -65,7 +65,8 @@ CalcClusterCentsNLCD <- function (counties.data, fips.codes) {
     # non-parallel iteration
     # for (fips in fips.codes) {  
     no.cores <- detectCores() - 1
-    cl <- makeCluster(no.cores, type = "SOCK", outfile = "")
+    no.cores = 30
+    cl <- makeCluster(no.cores, type = "SOCK", outfile = "log.nlcd.txt")
     registerDoSNOW(cl)
     
     US.cluster.cents <-
@@ -73,7 +74,7 @@ CalcClusterCentsNLCD <- function (counties.data, fips.codes) {
             .combine = "rbind",
             .packages = c("broom", "dplyr", "sp",
                           "raster", "maptools", 
-                          "rgeos")) %do% {
+                          "rgeos")) %dopar% {
     
     
     
@@ -85,7 +86,7 @@ CalcClusterCentsNLCD <- function (counties.data, fips.codes) {
       
       if (nrow(county.pts) < 20) {
         if (nrow(county.pts) == 0) {
-          county.poly <- counties[counties$FIPS == fips, ]
+          county.poly <- counties.data[counties.data$FIPS == fips, ]
           cent <- gCentroid(county.poly)
           x1 <- cent@coords[1]
           x2 <- cent@coords[2]
@@ -118,6 +119,10 @@ CalcClusterCentsNLCD <- function (counties.data, fips.codes) {
         cat("\n Performing k-means cluster analysis...") 
         # perform K-Means cluster analysis
         cluster.info <- kmeans(county.pts, 20)
+        #if (cluster.info$ifault==4)
+        #{print('change to another algorithm for kmean')
+        #gc()
+        #cluster.info=kmeans(county.pts, 20, iter.max = 100, algorithm="MacQueen")}
         
         cat("\n cbinding cluster groups to points data")
         # cbind cluster groups to points data
