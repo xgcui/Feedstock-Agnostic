@@ -158,8 +158,9 @@ BtDataSelect <-
     
     woody <- c("Willow", "Eucalyptus", "Poplar", "Pine")
     
-    residues <- c("Wheat straw", "Oat straw", "Corn stover", 
-                  "Barley straw", "Sorghum stubble")
+    residues <- c("Wheat straw", "Oats straw", "Corn stover", 
+                  "Barley straw", "Sorghum stubble",'Rice straw','Rice hulls'
+                  ,'Sugarcane bagasse','Sugarcane trash')
     
     # init feed_choices var
     feed_choices <- NULL
